@@ -7,8 +7,8 @@
 # Prof. Tiago A. Almeida
 #
 #
-# Nome:
-# RA:
+# Nome: Beatriz Rogers Tripoli Barbosa, Laura Naomi Seto
+# RA: 792170, 813210 
 # ################################################################
 
 # Arquivo com todas as funcoes e codigos referentes aos experimentos
