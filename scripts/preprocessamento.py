@@ -31,14 +31,18 @@ def invalidar_nao_numerico(df, colunas):
 def padronizar_string(df, colunas):
     return df[colunas].apply(lambda col: col.str.lower() if col.dtype == 'object' else col)
 
+def invalidar_nao_temporais(df, colunas):
+    return df[colunas].apply(pd.to_datetime, errors='coerce', format='%d/%m/%y')
+
+
 # EXCLUIR REGISTROS COM MENOS DE 50% DOS VALORES PREENCHIDOS 
 
 def remover_registros_incompletos(df, p):
     faltantes = df.isnull().sum(axis=1) > (df.shape[1]*p)
-    df = df[~faltantes]
+    return df[~faltantes]
 
 
-# PREENCHER FALTANTES 
+# IMPUTADORES
 
 def preencher_faltantes(df, estrategia) :
     from sklearn.impute import SimpleImputer
@@ -58,12 +62,32 @@ def preencher_teste(df, valores) :
     
     return df
 
+def imputador_faltantes_media(df, colunas):
+    from sklearn.impute import SimpleImputer
+    imputador = SimpleImputer(strategy='mean')
+
+    return imputador.fit(df[colunas])
+    
+
+def imputador_faltantes_moda(df, colunas):
+    from sklearn.impute import SimpleImputer
+    imputador = SimpleImputer(strategy='most_frequent')
+
+    return imputador.fit(df[colunas])
+
+def imputador_faltantes_knn(df, colunas, k):
+    from sklearn.impute import KNNImputer
+    imputador = KNNImputer(n_neighbors=k)
+
+    return imputador.fit(df[colunas])
+
 
 # EXLUIR DUPLICATAS (mesmos valores de atributos e mesma classifiação)
 
 def remover_duplicatas(df):
     # ignora o índice 
     return df.drop_duplicates(subset=df.columns[1:], keep='first')
+
 
 # EXCLUIR INCONSISTÊNCIAS (mesmos valores de atributos e classificação diferente)
 
@@ -114,6 +138,7 @@ def invalidar_outliers_percentil(df, colunas, p_inf, p_sup):
         df_copy.loc[~df_copy[coluna].between(limite_inferior, limite_superior), coluna] = np.nan
     return df_copy
 
+
 # CONVERTER SIMBÓLICO-NUMÉRICO
 
 def converter_ordinais(df, colunas, categorias) :  
@@ -141,6 +166,11 @@ def converter_nominais(df, colunas) :
         df_copy = pd.concat([df_copy.drop(columns=[coluna]), encoded_df], axis=1)
 
     return df_copy
+
+def codificador_converter_nominais(df, colunas):
+    from sklearn.preprocessing import OneHotEncoder
+    encoder = OneHotEncoder(sparse_output=False)
+    return encoder.fit(df[colunas])
 
 
 # NORMALIZAR ATRIBUTOS
