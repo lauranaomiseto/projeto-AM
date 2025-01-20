@@ -33,3 +33,12 @@ def analise_registro_incompleto(df, p):
     
     print(f"{soma} de {df.shape[0]} ({soma/df.shape[0]*100}%) registros com mais de {p*100}% dos atributos faltantes")
     # display(df[faltantes])
+
+def matriz_correlacao(df, colunas):
+    def color_corr(val):    
+        color = 'yellow' if (abs(val) > 0.5 and abs(val) != 1) else 'white'
+        return 'color: %s' % color
+
+    correlation_matrix = df[colunas].corr()
+    styled_corr = correlation_matrix.style.map(color_corr)
+    display(styled_corr)
