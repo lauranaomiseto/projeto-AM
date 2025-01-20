@@ -13,15 +13,8 @@
 
 # Arquivo com todas as funcoes e codigos referentes ao preprocessamento
 
-# biblioteca usada para trabalhar com vetores e matrizes
 import numpy as np 
-
-# biblioteca usada para trabalhar com dataframes e análise de dados
 import pandas as pd
-
-# bibliotecas usadas para geração de graficos
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 
 # IDENTIFICAR VALORES FALTANTES E INVÁLIDOS
@@ -102,14 +95,8 @@ def codificador_ordinais(df, colunas, categorias):
 
 
 # NORMALIZAR ATRIBUTOS
-def normalizar(df, treino) :
+def normalizador(df, colunas):
     from sklearn.preprocessing import StandardScaler
-    df_copy = df.copy()
-    
-    scaler = StandardScaler()
-    if(treino) :
-        df_copy.iloc[:,1:-1] = scaler.fit_transform(df_copy.iloc[:,1:-1])
-    else :
-        df_copy.iloc[:,1:] = scaler.fit_transform(df_copy.iloc[:,1:])
 
-    return df_copy
+    scalar = StandardScaler()
+    return scalar.fit(df[colunas])
