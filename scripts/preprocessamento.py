@@ -28,6 +28,11 @@ def invalidar_nao_temporais(df, colunas):
     return df[colunas].apply(pd.to_datetime, errors='coerce', format='%d/%m/%y')
 
 
+# EXCLUIR REGISTROS ADULTOS
+def remover_registros_adultos(df):
+    adultos = df['IDADE'] > 18
+    return df[~adultos]
+
 # EXCLUIR REGISTROS COM MENOS DE 50% DOS VALORES PREENCHIDOS 
 def remover_registros_incompletos(df, p):
     faltantes = df.isnull().sum(axis=1) > (df.shape[1]*p)
@@ -40,17 +45,22 @@ def imputador_faltantes_media(df, colunas):
     imputador = SimpleImputer(strategy='mean')
 
     return imputador.fit(df[colunas])
+
+def imputador_faltantes_mediana(df, colunas):
+    from sklearn.impute import SimpleImputer
+    imputador = SimpleImputer(strategy='median')
+
+    return imputador.fit(df[colunas])
     
+def imputador_faltantes_knn(df, colunas, k):
+    from sklearn.impute import KNNImputer
+    imputador = KNNImputer(n_neighbors=k)
+
+    return imputador.fit(df[colunas])
 
 def imputador_faltantes_moda(df, colunas):
     from sklearn.impute import SimpleImputer
     imputador = SimpleImputer(strategy='most_frequent')
-
-    return imputador.fit(df[colunas])
-
-def imputador_faltantes_knn(df, colunas, k):
-    from sklearn.impute import KNNImputer
-    imputador = KNNImputer(n_neighbors=k)
 
     return imputador.fit(df[colunas])
 
@@ -71,14 +81,18 @@ def remover_inconsistencia(df):
 # identificação de outliers por atributo 
 def invalidar_outliers_quartil(df, colunas):
     # marca outliers como NaN
+    classes = df['CLASSE'].unique()
     df_copy = df.copy()
     for coluna in colunas:
-        Q1 = df_copy[coluna].quantile(0.25)
-        Q3 = df_copy[coluna].quantile(0.75)
-        IQR = Q3 - Q1
-        limite_inferior = Q1 - 1.5 * IQR
-        limite_superior = Q3 + 1.5 * IQR
-        df_copy.loc[~df[coluna].between(limite_inferior, limite_superior), coluna] = np.nan
+        for classe in classes:
+            subset = df_copy[df_copy['CLASSE'] == classe]
+            Q1 = subset[coluna].quantile(0.25)
+            Q3 = subset[coluna].quantile(0.75)
+            IQR = Q3 - Q1
+            limite_inferior = Q1 - 1.5 * IQR
+            limite_superior = Q3 + 1.5 * IQR
+            mask_outliers = ~subset[coluna].between(limite_inferior, limite_superior)
+            df_copy.loc[subset[mask_outliers].index, coluna] = np.nan
     return df_copy
 
 
