@@ -105,6 +105,7 @@ def codificador_nominais(df, colunas):
 def codificador_ordinais(df, colunas, categorias):
     from sklearn.preprocessing import OrdinalEncoder
     encoder = OrdinalEncoder(categories=categorias)
+    print(colunas)
     return encoder.fit(df[colunas])
 
 
