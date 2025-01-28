@@ -15,14 +15,16 @@
 
 import numpy as np 
 import pandas as pd
+import unicodedata
+import re
 
 
 # IDENTIFICAR VALORES FALTANTES E INVÁLIDOS
 def invalidar_nao_numerico(df, colunas):
     return df[colunas].apply(pd.to_numeric, errors='coerce')
 
-def padronizar_string(df, colunas):
-    return df[colunas].apply(lambda col: col.str.lower() if col.dtype == 'object' else col)
+def padronizar_strings(df, colunas):
+    return df[colunas].apply(lambda col: col.str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('ascii').str.lower().str.replace(r'^\d+ - ', '', regex=True) if col.dtype == 'object' else col)
 
 def invalidar_nao_temporais(df, colunas):
     return df[colunas].apply(pd.to_datetime, errors='coerce', format='%d/%m/%y')
@@ -64,6 +66,12 @@ def imputador_faltantes_moda(df, colunas):
 
     return imputador.fit(df[colunas])
 
+def imputador_faltantes_outro(df, colunas):
+    from sklearn.impute import SimpleImputer
+    imputador = SimpleImputer(strategy='constant', fill_value='outro')
+
+    return imputador.fit(df[colunas])
+
 
 # EXLUIR DUPLICATAS (mesmos valores de atributos e mesma classifiação)
 def remover_duplicatas(df):
@@ -99,13 +107,12 @@ def invalidar_outliers_quartil(df, colunas):
 # CONVERTER SIMBÓLICO-NUMÉRICO
 def codificador_nominais(df, colunas):
     from sklearn.preprocessing import OneHotEncoder
-    encoder = OneHotEncoder(sparse_output=False)
+    encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
     return encoder.fit(df[colunas])
 
 def codificador_ordinais(df, colunas, categorias):
     from sklearn.preprocessing import OrdinalEncoder
     encoder = OrdinalEncoder(categories=categorias)
-    print(colunas)
     return encoder.fit(df[colunas])
 
 
