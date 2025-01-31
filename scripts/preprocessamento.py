@@ -72,6 +72,8 @@ pulsos_categorias = [
     'diminuidos'
 ]
 
+col_ordinal_categorias = [hda1_categorias, motivo1_categorias]
+
 
 # IDENTIFICAR VALORES FALTANTES E INVÁLIDOS
 
@@ -83,7 +85,6 @@ def normalizar_strings(series):
             .apply(lambda x: unicodedata.normalize('NFKD', x).encode('ascii', errors='ignore').decode('ascii')).str.lower().str.replace(r'^\d+ - ', '', regex=True))
 
 def identificar_invalidos(df, teste):
-
     df_copy = df.copy()
     cols = df_copy.columns
 
@@ -208,7 +209,6 @@ def remover_inconsistencia(df):
 
 
 # IDENTIFICAR OUTLIERS SEM CONSIDERAR RELAÇÃO ENTRE ATRIBUTOS
-# identificação de outliers por atributo 
 def invalidar_outliers_quartil(df, colunas):
     # marca outliers como NaN
     classes = df['CLASSE'].unique()
@@ -223,6 +223,25 @@ def invalidar_outliers_quartil(df, colunas):
             limite_superior = Q3 + 1.5 * IQR
             mask_outliers = ~subset[coluna].between(limite_inferior, limite_superior)
             df_copy.loc[subset[mask_outliers].index, coluna] = np.nan
+    return df_copy
+
+# CRIAR ATRIBUTOS NOVOS
+def criar_novos_atributos(df):    
+    df_copy = df.copy()
+    
+    # categorias para FC baseadas na idade
+    def categorizar_fc(fc, idade):
+        if idade <= 1:
+            return 'bradicardia' if fc < 100 else 'taquicardia' if fc > 180 else 'normal'
+        elif idade <= 5:
+            return 'bradicardia' if fc < 80 else 'taquicardia' if fc > 140 else 'normal'
+        elif idade <= 12:
+            return 'bradicardia' if fc < 70 else 'taquicardia' if fc > 120 else 'normal'
+        else:
+            return 'bradicardia' if fc < 60 else 'taquicardia' if fc > 100 else 'normal'
+    
+    df_copy['FC_Categoria'] = df_copy.apply(lambda row: categorizar_fc(row['FC'], row['IDADE']), axis=1)
+
     return df_copy
 
 

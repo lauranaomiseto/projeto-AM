@@ -31,7 +31,7 @@ def analise_registro_incompleto(df, p):
     faltantes = df.isnull().sum(axis=1) > (df.shape[1]*p)
     soma = faltantes.sum()
     
-    print(f"{soma} de {df.shape[0]} ({soma/df.shape[0]*100}%) registros com mais de {p*100}% dos atributos faltantes")
+    print(f"{soma} de {df.shape[0]} ({(soma/df.shape[0]*100):.2f}%) registros com mais de {p*100}% dos atributos faltantes")
     # display(df[faltantes])
 
 def matriz_correlacao(df, colunas):
