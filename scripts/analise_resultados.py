@@ -16,13 +16,10 @@
 import matplotlib.pyplot as plt
 import numpy as np 
 
-
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
-from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, roc_auc_score
-from sklearn.model_selection import train_test_split
-
-
 def avaliar_modelos(models, param_grids, X_train, y_train, X_val, y_val):
+    from sklearn.model_selection import GridSearchCV, StratifiedKFold
+    from sklearn.metrics import classification_report, accuracy_score, confusion_matrix, roc_auc_score
+    from sklearn.model_selection import train_test_split
     results = {}
 
     # Configurando o K-Folds
@@ -52,7 +49,7 @@ def avaliar_modelos(models, param_grids, X_train, y_train, X_val, y_val):
             train_errors.append(1 - best_model.score(X_partial, y_partial))
             val_errors.append(1 - best_model.score(X_val, y_val))
         
-        plt.figure()
+        plt.figure(figsize=(5, 3))
         plt.plot(train_sizes, train_errors, label="Treino", marker='o')
         plt.plot(train_sizes, val_errors, label="Validação", marker='s')
         plt.xlabel("Tamanho do Treinamento")
