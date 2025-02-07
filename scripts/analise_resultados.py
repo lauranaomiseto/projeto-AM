@@ -22,13 +22,13 @@ def avaliar_modelos(models, param_grids, X_train, y_train, X_val, y_val):
     from sklearn.model_selection import train_test_split
     results = {}
 
-    # Configurando o K-Folds
+    # configurando o K-Folds
     kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
     for name, model in models.items():
         print(f"Avaliando {name}...")
         
-        # Ajuste de hiperparâmetros, se aplicável
+        # ajuste de hiperparâmetros, se aplicável
         if name in param_grids and param_grids[name]:
             grid_search = GridSearchCV(model, param_grid=param_grids[name], cv=kfold, scoring="accuracy")
             grid_search.fit(X_train, y_train)
@@ -38,7 +38,7 @@ def avaliar_modelos(models, param_grids, X_train, y_train, X_val, y_val):
             best_model = model
             best_model.fit(X_train, y_train)
         
-        # Curvas de aprendizado
+        # curvas de aprendizado
         train_sizes = np.linspace(0.1, 0.9, 10)
         train_errors = []
         val_errors = []
@@ -58,17 +58,17 @@ def avaliar_modelos(models, param_grids, X_train, y_train, X_val, y_val):
         plt.legend()
         plt.show()
         
-        # Predição
+        # predição
         y_pred = best_model.predict(X_val)
 
-        # Cálculo da AUC-ROC
+        # cálculo da AUC-ROC
         if hasattr(best_model, "predict_proba"):
             y_proba = best_model.predict_proba(X_val)[:, 1]
             auc_roc = roc_auc_score(y_val, y_proba)
         else:
             auc_roc = None
 
-        # Métricas
+        # métricas
         acc = accuracy_score(y_val, y_pred)
         conf_matrix = confusion_matrix(y_val, y_pred)
         class_report = classification_report(y_val, y_pred)
